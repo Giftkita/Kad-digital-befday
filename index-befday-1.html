@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Buat Kad Hari Jadi 💖</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#fce4ec,#f8bbd0,#fce4ec);min-height:100vh;padding:20px;display:flex;justify-content:center}
+.container{background:#fff;padding:30px;border-radius:20px;box-shadow:0 8px 32px rgba(233,30,99,.15);width:100%;max-width:750px;height:fit-content}
+h2{color:#e91e63;text-align:center;font-size:1.5rem;margin-bottom:5px}
+.subtitle-top{text-align:center;color:#aaa;font-size:.82rem;margin-bottom:20px}
+h3{color:#c2185b;margin:28px 0 10px;font-size:1rem;border-left:4px solid #e91e63;padding-left:10px;display:flex;align-items:center;gap:.4rem}
+label{font-weight:600;font-size:.82rem;color:#444;display:block;margin-top:12px;margin-bottom:4px}
+input[type=text],textarea{width:100%;padding:10px 12px;border:1.5px solid #eee;border-radius:10px;font-family:'Poppins',sans-serif;font-size:.85rem;outline:none;transition:.2s}
+input[type=text]:focus,textarea:focus{border-color:#e91e63;box-shadow:0 0 0 3px rgba(233,30,99,.08)}
+textarea{height:95px;resize:vertical}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>div{flex:1;min-width:180px}
+.hint{font-size:.72rem;color:#bbb;margin-bottom:4px;display:block}
+/* Upload */
+.upl-wrap{position:relative;overflow:hidden;display:inline-block;width:100%;margin-top:4px}
+.upl-wrap input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:100px}
+.upl-btn{background:#fafafa;border:2px dashed #ddd;padding:10px;text-align:center;border-radius:10px;color:#888;font-size:.8rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;cursor:pointer}
+.upl-wrap:hover .upl-btn{background:#fff0f5;border-color:#f48fb1;color:#e91e63}
+.prev{width:100%;height:110px;border-radius:8px;margin-top:8px;object-fit:cover;border:1.5px solid #eee;display:block}
+/* Button */
+.gen-btn{width:100%;padding:16px;background:linear-gradient(135deg,#e91e63,#c2185b);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:28px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.gen-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(233,30,99,.3)}
+.gen-btn:disabled{background:#ccc;transform:none;box-shadow:none;cursor:not-allowed}
+/* Result */
+#result{margin-top:18px;padding:16px;background:#e8f5e9;border:1.5px solid #4caf50;border-radius:12px;display:none;text-align:center}
+#result p{font-size:.85rem;color:#2e7d32;margin-bottom:8px}
+#share-link{color:#e91e63;font-weight:600;word-break:break-all;font-size:.82rem;display:block;margin:8px 0}
+.copy-btn{background:#e91e63;color:#fff;border:none;padding:10px 22px;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif;font-weight:600;font-size:.82rem;transition:.2s}
+.copy-btn:hover{background:#c2185b}
+/* Error */
+#err-box{margin-top:18px;padding:14px;background:#ffebee;border:1.5px solid #ef9a9a;border-radius:12px;display:none;font-size:.8rem;color:#c62828}
+#err-box code{background:#fff;padding:4px 8px;border-radius:6px;display:block;margin-top:8px;font-size:.72rem;line-height:1.8;color:#333;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>💖 Buat Kad Hari Jadi</h2>
+  <p class="subtitle-top">Isi maklumat di bawah & jana link kad cantik untuk orang istimewa kamu</p>
+
+  <h3>🎂 Slide 1 — Muka Depan</h3>
+  <div class="row">
+    <div>
+      <label>Tajuk Utama</label>
+      <input type="text" id="title" value="Happy Birthday">
+    </div>
+    <div>
+      <label>Nama / Ucapan Kecil</label>
+      <input type="text" id="subtitle" value="Sayanggg 💕">
+    </div>
+  </div>
+  <label>Link Lagu YouTube</label>
+  <span class="hint">https://www.youtube.com/watch?v=...</span>
+  <input type="text" id="yt" placeholder="Paste link YouTube lagu kegemaran kamu">
+
+  <h3>🌟 Slide 2 — Doa & Harapan</h3>
+  <label>Senarai Doa (Enter = baris baru)</label>
+  <textarea id="wishes">Semoga sihat selalu, panjang umur dan semua yang awak mahu segera tercapai.
+Kamu hebat sekali bisa bertahan dan lalui semua masalah yang datang.
+Semoga di umur baru ini segalanya akan dipermudahkan.
+Terima kasih sebab sentiasa ada dengan saya.</textarea>
+  <label>Gambar (Kek / Bunga dll)</label>
+  <div class="upl-wrap"><div class="upl-btn">📷 Pilih Gambar</div><input type="file" accept="image/*" onchange="upload(event,'cake_img')"></div>
+  <input type="hidden" id="cake_img" value="https://images.unsplash.com/photo-1558301211-0d8c8ddee6ec?q=80&w=600&auto=format&fit=crop">
+  <img id="preview_cake_img" class="prev" src="https://images.unsplash.com/photo-1558301211-0d8c8ddee6ec?q=80&w=600&auto=format&fit=crop">
+
+  <h3>📸 Slide 3 — Polaroid Kenangan</h3>
+  <div class="row">
+    <div>
+      <label>Gambar Kiri</label>
+      <div class="upl-wrap"><div class="upl-btn">📷 Pilih</div><input type="file" accept="image/*" onchange="upload(event,'p1_img')"></div>
+      <input type="hidden" id="p1_img" value="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=400&auto=format&fit=crop">
+      <img id="preview_p1_img" class="prev" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=400&auto=format&fit=crop">
+      <input type="text" id="p1_txt" value="My favorite smile" style="margin-top:6px">
+    </div>
+    <div>
+      <label>Gambar Tengah</label>
+      <div class="upl-wrap"><div class="upl-btn">📷 Pilih</div><input type="file" accept="image/*" onchange="upload(event,'p2_img')"></div>
+      <input type="hidden" id="p2_img" value="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=400&auto=format&fit=crop">
+      <img id="preview_p2_img" class="prev" src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=400&auto=format&fit=crop">
+      <input type="text" id="p2_txt" value="My favorite person" style="margin-top:6px">
+    </div>
+    <div>
+      <label>Gambar Kanan</label>
+      <div class="upl-wrap"><div class="upl-btn">📷 Pilih</div><input type="file" accept="image/*" onchange="upload(event,'p3_img')"></div>
+      <input type="hidden" id="p3_img" value="https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=400&auto=format&fit=crop">
+      <img id="preview_p3_img" class="prev" src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=400&auto=format&fit=crop">
+      <input type="text" id="p3_txt" value="My everything" style="margin-top:6px">
+    </div>
+  </div>
+
+  <h3>💬 Slide 4 — Ayat Sweet</h3>
+  <label>Petikan Kata</label>
+  <textarea id="quote" style="height:65px">I Always Love You</textarea>
+  <label>Daripada</label>
+  <input type="text" id="author" value="Your Beloved">
+
+  <h3>📖 Slide 5 — Cerita Kita</h3>
+  <label>Cerita Pendek</label>
+  <textarea id="story">Terima kasih sayang, tiap hari dengan kamu tu tak pernah membosankan.
+Selalu ada hal kecil yang bikin aku bersyukur ada kamu.</textarea>
+  <label>Gambar Cerita</label>
+  <div class="upl-wrap"><div class="upl-btn">📷 Pilih Gambar</div><input type="file" accept="image/*" onchange="upload(event,'story_img')"></div>
+  <input type="hidden" id="story_img" value="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=640&auto=format&fit=crop">
+  <img id="preview_story_img" class="prev" src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=640&auto=format&fit=crop">
+
+  <h3>🎁 Slide 6 — Kejutan!</h3>
+  <label>Ucapan Kejutan</label>
+  <input type="text" id="surprise_msg" value="Happy Birthday Sayang! ❤️">
+  <label>Gambar Kejutan</label>
+  <div class="upl-wrap"><div class="upl-btn" style="background:#fff0f5;border-color:#f48fb1">🎁 Pilih Gambar Kejutan</div><input type="file" accept="image/*" onchange="upload(event,'surprise_img')"></div>
+  <input type="hidden" id="surprise_img" value="https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=600&auto=format&fit=crop">
+  <img id="preview_surprise_img" class="prev" src="https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=600&auto=format&fit=crop">
+
+  <button class="gen-btn" onclick="generate()" id="gen-btn">💖 Jana Link Kad Sekarang!</button>
+
+  <div id="result">
+    <p>✅ Berjaya! Salin link di bawah dan hantar kepada dia:</p>
+    <a id="share-link" href="#" target="_blank"></a>
+    <button class="copy-btn" onclick="copyLink()">📋 Salin Link</button>
+  </div>
+  <div id="err-box">
+    <strong>❌ Ralat:</strong> <span id="err-msg"></span>
+    <code id="sql-hint" style="display:none">CREATE TABLE IF NOT EXISTS cards (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, card_data jsonb, created_at timestamptz DEFAULT now());
+ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON cards FOR ALL USING (true) WITH CHECK (true);</code>
+  </div>
+</div>
+<script>
+const SB_URL='https://lejpuajafuenlfvlovfg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlanB1YWphZnVlbmxmdmxvdmZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjYyNTAsImV4cCI6MjA5MjcwMjI1MH0.rwABj8DyW3dijUr5TurtMoemZgG2b9LgSHSicUMxMmc';
+const db=window.supabase.createClient(SB_URL,SB_KEY);
+
+function upload(e,id){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.readAsDataURL(f);
+  r.onload=ev=>{
+    const i=new Image();i.src=ev.target.result;
+    i.onload=()=>{
+      const c=document.createElement('canvas');
+      const M=600;let w=i.width,h=i.height;
+      if(w>h){if(w>M){h=h*M/w;w=M}}else{if(h>M){w=w*M/h;h=M}}
+      c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h);
+      const d=c.toDataURL('image/jpeg',.65);
+      document.getElementById(id).value=d;
+      document.getElementById('preview_'+id).src=d;
+    };
+  };
+}
+
+async function generate(){
+  const btn=document.getElementById('gen-btn');
+  const err=document.getElementById('err-box');
+  const res=document.getElementById('result');
+  btn.textContent='⏳ Menyimpan...';btn.disabled=true;
+  err.style.display='none';res.style.display='none';
+
+  const d={
+    title:document.getElementById('title').value,
+    subtitle:document.getElementById('subtitle').value,
+    yt:document.getElementById('yt').value,
+    wishes:document.getElementById('wishes').value,
+    cake_img:document.getElementById('cake_img').value,
+    p1_img:document.getElementById('p1_img').value,p1_txt:document.getElementById('p1_txt').value,
+    p2_img:document.getElementById('p2_img').value,p2_txt:document.getElementById('p2_txt').value,
+    p3_img:document.getElementById('p3_img').value,p3_txt:document.getElementById('p3_txt').value,
+    quote:document.getElementById('quote').value,
+    author:document.getElementById('author').value,
+    story:document.getElementById('story').value,
+    story_img:document.getElementById('story_img').value,
+    surprise_img:document.getElementById('surprise_img').value,
+    surprise_msg:document.getElementById('surprise_msg').value
+  };
+
+  const kb=Math.round(JSON.stringify(d).length/1024);
+  if(kb>4000){
+    showErr(`Data terlalu besar (~${kb}KB). Guna gambar yang lebih kecil.`);
+    btn.textContent='💖 Jana Link Kad Sekarang!';btn.disabled=false;return;
+  }
+
+  try{
+    const{data,error}=await db.from('cards').insert([{card_data:d}]).select();
+    if(error)throw error;
+    const id=data[0].id;
+    let base=window.location.href.replace(/index\.html.*/,'').replace(/[?#].*/,'');
+    if(!base.endsWith('/'))base+='/';
+    const link=base+'card.html?id='+id;
+    document.getElementById('share-link').href=link;
+    document.getElementById('share-link').textContent=link;
+    res.style.display='block';
+    res.scrollIntoView({behavior:'smooth'});
+  }catch(e){
+    let msg=e.message||String(e);
+    if(msg.includes('cards')&&msg.includes('exist')){
+      msg='Table "cards" belum dibuat. Run SQL ini dalam Supabase:';
+      document.getElementById('sql-hint').style.display='block';
+    }
+    showErr(msg);
+  }
+  btn.textContent='💖 Jana Link Kad Sekarang!';btn.disabled=false;
+}
+
+function showErr(msg){
+  document.getElementById('err-msg').textContent=msg;
+  document.getElementById('err-box').style.display='block';
+}
+
+function copyLink(){
+  const l=document.getElementById('share-link').href;
+  navigator.clipboard.writeText(l).catch(()=>{
+    const t=document.createElement('textarea');t.value=l;
+    document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
+  });
+  alert('✅ Link disalin!');
+}
+</script>
+</body>
+</html>
